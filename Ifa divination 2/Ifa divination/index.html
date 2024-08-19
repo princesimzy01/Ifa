@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>Ifa Divination</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+      }
+      .container {
+        background-color: white;
+        padding: 1.2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 0.6rem rgba(0, 0, 0, 0.1);
+        width: 19rem;
+        text-align: center;
+      }
+
+      .container h1 {
+        margin-bottom: 1.2rem;
+      }
+      .container input {
+        width: 90%;
+        padding: 0.6rem;
+        margin-bottom: 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+      }
+      .container button {
+        padding: 0.6rem 1.2rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+      }
+      .container button:hover {
+        background-color: #0056b3;
+      }
+      .result {
+        margin-top: 1.2rem;
+        padding: 0.6rem;
+        background-color: #e9e9e9;
+        border-radius: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Ifa Divination System</h1>
+      <input type="text" id="question" placeholder="What is the Issue" />
+      <select id="keywordSelect" style="display: none"></select>
+      <button onclick="divine()">Get Answers</button>
+      <div class="result" id="result"></div>
+    </div>
+    <script>
+      async function divine() {
+        const question = document.getElementById("question").value;
+        const selectedKey = document.getElementById("keywordSelect").value;
+        const data = { question: question };
+        if (selectedKey) {
+          data.selected_key = selectedKey;
+        }
+
+        if (question.trim() === "") {
+          alert("Please enter a question.");
+          return;
+        }
+        try {
+          const response = await fetch("http://127.0.0.1:5000/divine", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+
+          if (result.keywords) {
+            const keywordSelect = document.getElementById("keywordSelect");
+            keywordSelect.style.display = "block";
+            keywordSelect.innerHTML =
+              '<option value="">Select a keyword</option>';
+            result.keywords.forEach((keyword) => {
+              const option = document.createElement("option");
+              option.value = keyword;
+              option.textContent = keyword;
+              keywordSelect.appendChild(option);
+            });
+          } else {
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `<strong>Odu:</strong> ${result.odu}<br><strong>Verse:</strong> ${result.verses}<br><strong>Advice:</strong> ${result.advice}`;
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Please Contact Baba Ifagbemi for further help!");
+        }
+      }
+    </script>
+  </body>
+</html>
